@@ -321,9 +321,9 @@
             };
         }
 
-        // Generar preguntas de completar espacios
+        // Generate fill in the blank questions
         function generateFillBlank(word, definition) {
-            // Crear diferentes versiones de la pregunta
+            // Create different versions of the question
             const patterns = [
                 `${definition.replace(word.toLowerCase(), '______')}`,
                 `The definition of ______ is: ${definition}`,
@@ -341,36 +341,36 @@
             };
         }
 
-        // Generar todas las preguntas
+        // Generate all questions
         function generateQuestions() {
             const words = Object.keys(vocabulary);
-            const definitions = Object.values(vocabulary);
             const shuffledWords = words.sort(() => Math.random() - 0.5);
-            
             const questions = [];
             
-            // Generar 3 preguntas de opción múltiple
-            for (let i = 0; i < 3; i++) {
-                questions.push(generateMultipleChoice(
-                    shuffledWords[i], 
-                    vocabulary[shuffledWords[i]], 
-                    words, 
-                    definitions
-                ));
-            }
+            // Randomly assign each word to either multiple choice or fill blank
+            shuffledWords.forEach((word, index) => {
+                const questionType = Math.random() < 0.5 ? 'multiple' : 'fillblank';
+                
+                if (questionType === 'multiple') {
+                    const definitions = Object.values(vocabulary);
+                    questions.push(generateMultipleChoice(
+                        word, 
+                        vocabulary[word], 
+                        words, 
+                        definitions
+                    ));
+                } else {
+                    questions.push(generateFillBlank(
+                        word, 
+                        vocabulary[word]
+                    ));
+                }
+            });
             
-            // Generar 3 preguntas de completar espacios
-            for (let i = 3; i < 6; i++) {
-                questions.push(generateFillBlank(
-                    shuffledWords[i], 
-                    vocabulary[shuffledWords[i]]
-                ));
-            }
-            
-            return questions.sort(() => Math.random() - 0.5); // Mezclar el orden final
+            return questions;
         }
 
-        // Renderizar preguntas en el DOM
+        // Render questions in DOM
         function renderQuestions() {
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
@@ -409,45 +409,57 @@
             });
         }
 
-        // Seleccionar opción en preguntas múltiples
+        // Select option in multiple choice questions
         function selectOption(questionIndex, optionIndex, optionText) {
-            const optionsContainer = document.querySelectorAll('.options')[questionIndex];
-            const options = optionsContainer.querySelectorAll('.option');
+            const questionContainers = document.querySelectorAll('.question-container');
+            const questionContainer = questionContainers[questionIndex];
+            const optionsContainer = questionContainer.querySelector('.options');
             
-            options.forEach(opt => opt.classList.remove('selected'));
-            options[optionIndex].classList.add('selected');
-            
-            userAnswers[questionIndex] = optionText;
+            if (optionsContainer) {
+                const options = optionsContainer.querySelectorAll('.option');
+                options.forEach(opt => opt.classList.remove('selected'));
+                options[optionIndex].classList.add('selected');
+                
+                userAnswers[questionIndex] = optionText;
+            }
         }
 
-        // Verificar respuestas
+        // Check answers
         function checkAnswers() {
             score = 0;
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
             
+            const questionContainers = document.querySelectorAll('.question-container');
+            
             currentQuestions.forEach((question, index) => {
                 const userAnswer = userAnswers[index] || '';
                 let isCorrect = false;
+                const questionContainer = questionContainers[index];
                 
                 if (question.type === 'multiple') {
                     isCorrect = userAnswer === question.correctAnswer;
-                    const optionsContainer = document.querySelectorAll('.options')[index];
-                    const options = optionsContainer.querySelectorAll('.option');
+                    const optionsContainer = questionContainer.querySelector('.options');
                     
-                    options.forEach(option => {
-                        if (option.textContent === question.correctAnswer) {
-                            option.classList.add('correct');
-                        } else if (option.classList.contains('selected') && option.textContent !== question.correctAnswer) {
-                            option.classList.add('incorrect');
-                        }
-                    });
+                    if (optionsContainer) {
+                        const options = optionsContainer.querySelectorAll('.option');
+                        options.forEach(option => {
+                            if (option.textContent === question.correctAnswer) {
+                                option.classList.add('correct');
+                            } else if (option.classList.contains('selected') && option.textContent !== question.correctAnswer) {
+                                option.classList.add('incorrect');
+                            }
+                        });
+                    }
                 } else {
                     isCorrect = userAnswer.toLowerCase() === question.correctAnswer.toLowerCase();
-                    const input = document.querySelectorAll('.fill-blank-input')[index - 3];
-                    input.classList.add(isCorrect ? 'correct' : 'incorrect');
-                    if (!isCorrect) {
-                        input.value += ` (Correct: ${question.correctAnswer})`;
+                    const input = questionContainer.querySelector('.fill-blank-input');
+                    
+                    if (input) {
+                        input.classList.add(isCorrect ? 'correct' : 'incorrect');
+                        if (!isCorrect) {
+                            input.value += ` (Correct: ${question.correctAnswer})`;
+                        }
                     }
                 }
                 
@@ -469,14 +481,20 @@
             document.getElementById('restart-btn').classList.remove('hidden');
         }
 
-        // Iniciar juego
+        // Start game
         function startGame() {
+            // Generate new questions with random types
             currentQuestions = generateQuestions();
             userAnswers = new Array(6).fill('');
             score = 0;
             
+            // Clear any previous results
+            document.getElementById('results').innerHTML = '';
+            
+            // Render new questions
             renderQuestions();
             
+            // Update UI
             document.getElementById('start-btn').classList.add('hidden');
             document.getElementById('submit-btn').classList.remove('hidden');
             document.getElementById('restart-btn').classList.add('hidden');
@@ -484,14 +502,23 @@
             document.getElementById('results').classList.add('hidden');
         }
 
-        // Reiniciar juego
+        // Restart game
         function restartGame() {
+            // Clear all previous data
+            currentQuestions = [];
+            userAnswers = [];
+            score = 0;
+            
+            // Reset UI
+            document.getElementById('questions-container').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+            
+            // Hide results and show start button
             document.getElementById('start-btn').classList.remove('hidden');
             document.getElementById('submit-btn').classList.add('hidden');
             document.getElementById('restart-btn').classList.add('hidden');
             document.getElementById('score-container').classList.add('hidden');
             document.getElementById('results').classList.add('hidden');
-            document.getElementById('questions-container').innerHTML = '';
         }
 
         // Event listeners
