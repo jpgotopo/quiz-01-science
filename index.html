@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Vocabulary Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .game-content {
+            padding: 30px;
+        }
+
+        .question-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #4facfe;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .question-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .question-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .question-type {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background: #e3f2fd;
+            border-color: #4facfe;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            border-color: #56ab2f;
+            color: white;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+            border-color: #ff6b6b;
+            color: white;
+        }
+
+        .fill-blank-input {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1em;
+            width: 100%;
+            margin-top: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .fill-blank-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .fill-blank-input.correct {
+            border-color: #56ab2f;
+            background: #e8f5e8;
+        }
+
+        .fill-blank-input.incorrect {
+            border-color: #ff6b6b;
+            background: #ffeaea;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+            box-shadow: 0 5px 15px rgba(252, 182, 159, 0.3);
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .result-correct {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .result-incorrect {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .game-content {
+                padding: 20px;
+            }
+
+            .question-container {
+                padding: 20px;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .question-container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 Science Vocabulary Game</h1>
+            <p>Test your science knowledge</p>
+        </div>
+
+        <div class="game-content">
+            <div id="score-container" class="score hidden">
+                Score: <span id="score">0</span> / 6
+            </div>
+
+            <div id="questions-container">
+                <!-- Las preguntas se generarán aquí -->
+            </div>
+
+            <div class="controls">
+                <button id="start-btn" class="btn">🚀 Start Game</button>
+                <button id="submit-btn" class="btn hidden">📝 Check Answers</button>
+                <button id="restart-btn" class="btn secondary hidden">🔄 Play Again</button>
+            </div>
+
+            <div id="results" class="hidden">
+                <!-- Los resultados se mostrarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vocabulary = {
+            "Energy": "the ability to do an action",
+            "Motion": "change of position of an object",
+            "Speed": "how fast something moves",
+            "Stored Energy": "energy that is not in use, but is stored inside something",
+            "Model": "a pretend version of something scientists can use if the real thing is too big or difficult to work with",
+            "Fair Test": "an experiment where only one thing is changed and everything else stays the same"
+        };
+
+        let currentQuestions = [];
+        let userAnswers = [];
+        let score = 0;
+
+        // Generate wrong options for multiple choice questions
+        function generateWrongOptions(correctAnswer, allDefinitions) {
+            const wrong = allDefinitions.filter(def => def !== correctAnswer);
+            const shuffled = wrong.sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, 3);
+        }
+
+        // Generate multiple choice questions
+        function generateMultipleChoice(word, definition, allWords, allDefinitions) {
+            const wrongOptions = generateWrongOptions(definition, allDefinitions);
+            const allOptions = [definition, ...wrongOptions].sort(() => Math.random() - 0.5);
+            
+            return {
+                type: 'multiple',
+                word: word,
+                question: `What is the correct definition of "${word}"?`,
+                options: allOptions,
+                correctAnswer: definition
+            };
+        }
+
+        // Generar preguntas de completar espacios
+        function generateFillBlank(word, definition) {
+            // Crear diferentes versiones de la pregunta
+            const patterns = [
+                `${definition.replace(word.toLowerCase(), '______')}`,
+                `The definition of ______ is: ${definition}`,
+                `______ is defined as: ${definition}`,
+                `Complete: ______ - ${definition}`
+            ];
+            
+            const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
+            
+            return {
+                type: 'fillblank',
+                word: word,
+                question: selectedPattern,
+                correctAnswer: word
+            };
+        }
+
+        // Generar todas las preguntas
+        function generateQuestions() {
+            const words = Object.keys(vocabulary);
+            const definitions = Object.values(vocabulary);
+            const shuffledWords = words.sort(() => Math.random() - 0.5);
+            
+            const questions = [];
+            
+            // Generar 3 preguntas de opción múltiple
+            for (let i = 0; i < 3; i++) {
+                questions.push(generateMultipleChoice(
+                    shuffledWords[i], 
+                    vocabulary[shuffledWords[i]], 
+                    words, 
+                    definitions
+                ));
+            }
+            
+            // Generar 3 preguntas de completar espacios
+            for (let i = 3; i < 6; i++) {
+                questions.push(generateFillBlank(
+                    shuffledWords[i], 
+                    vocabulary[shuffledWords[i]]
+                ));
+            }
+            
+            return questions.sort(() => Math.random() - 0.5); // Mezclar el orden final
+        }
+
+        // Renderizar preguntas en el DOM
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            
+            currentQuestions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.innerHTML = `
+                    <div class="question-type">${question.type === 'multiple' ? 'Multiple Choice' : 'Fill in the Blank'}</div>
+                    <div class="question-title">Question ${index + 1}: ${question.question}</div>
+                `;
+                
+                if (question.type === 'multiple') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    question.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = () => selectOption(index, optIndex, option);
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'fill-blank-input';
+                    input.placeholder = 'Type your answer here...';
+                    input.oninput = (e) => userAnswers[index] = e.target.value.trim();
+                    questionDiv.appendChild(input);
+                }
+                
+                container.appendChild(questionDiv);
+            });
+        }
+
+        // Seleccionar opción en preguntas múltiples
+        function selectOption(questionIndex, optionIndex, optionText) {
+            const optionsContainer = document.querySelectorAll('.options')[questionIndex];
+            const options = optionsContainer.querySelectorAll('.option');
+            
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+            
+            userAnswers[questionIndex] = optionText;
+        }
+
+        // Verificar respuestas
+        function checkAnswers() {
+            score = 0;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            currentQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index] || '';
+                let isCorrect = false;
+                
+                if (question.type === 'multiple') {
+                    isCorrect = userAnswer === question.correctAnswer;
+                    const optionsContainer = document.querySelectorAll('.options')[index];
+                    const options = optionsContainer.querySelectorAll('.option');
+                    
+                    options.forEach(option => {
+                        if (option.textContent === question.correctAnswer) {
+                            option.classList.add('correct');
+                        } else if (option.classList.contains('selected') && option.textContent !== question.correctAnswer) {
+                            option.classList.add('incorrect');
+                        }
+                    });
+                } else {
+                    isCorrect = userAnswer.toLowerCase() === question.correctAnswer.toLowerCase();
+                    const input = document.querySelectorAll('.fill-blank-input')[index - 3];
+                    input.classList.add(isCorrect ? 'correct' : 'incorrect');
+                    if (!isCorrect) {
+                        input.value += ` (Correct: ${question.correctAnswer})`;
+                    }
+                }
+                
+                if (isCorrect) score++;
+                
+                const resultMessage = document.createElement('div');
+                resultMessage.className = `result-message ${isCorrect ? 'result-correct' : 'result-incorrect'}`;
+                resultMessage.innerHTML = `
+                    <strong>Question ${index + 1}:</strong> ${isCorrect ? '✅ Correct' : '❌ Incorrect'}<br>
+                    ${!isCorrect ? `Correct answer: <strong>${question.correctAnswer}</strong>` : ''}
+                `;
+                resultsDiv.appendChild(resultMessage);
+            });
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('score-container').classList.remove('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.remove('hidden');
+        }
+
+        // Iniciar juego
+        function startGame() {
+            currentQuestions = generateQuestions();
+            userAnswers = new Array(6).fill('');
+            score = 0;
+            
+            renderQuestions();
+            
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('submit-btn').classList.remove('hidden');
+            document.getElementById('restart-btn').classList.add('hidden');
+            document.getElementById('score-container').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+        }
+
+        // Reiniciar juego
+        function restartGame() {
+            document.getElementById('start-btn').classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.add('hidden');
+            document.getElementById('score-container').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('questions-container').innerHTML = '';
+        }
+
+        // Event listeners
+        document.getElementById('start-btn').onclick = startGame;
+        document.getElementById('submit-btn').onclick = checkAnswers;
+        document.getElementById('restart-btn').onclick = restartGame;
+    </script>
+</body>
+</html>
